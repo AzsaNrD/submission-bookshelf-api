@@ -67,16 +67,46 @@ const addBookHandler = (request, h) => {
   return response;
 };
 
-const getAllBooksHandler = () => ({
-  status: 'success',
-  data: {
-    books: bookshelf.map((book) => ({
-      id: book.id,
-      name: book.name,
-      publisher: book.publisher,
-    })),
-  },
-});
+const getAllBooksHandler = (request, h) => {
+  const { name, reading, finished } = request.query;
+
+  let books = bookshelf;
+
+  if (name !== undefined) {
+    books = books.filter((book) => book.name.toLowerCase().includes(name.toLowerCase()));
+  }
+
+  if (reading !== undefined) {
+    if (reading === 0) {
+      books = books.filter((book) => book.reading === false);
+    }
+    if (reading === 1) {
+      books = books.filter((book) => book.reading === true);
+    }
+  }
+
+  if (finished !== undefined) {
+    if (finished === 0) {
+      books = books.filter((book) => book.finished === false);
+    }
+    if (finished === 1) {
+      books = books.filter((book) => book.finished === true);
+    }
+  }
+
+  const response = h.response({
+    status: 'success',
+    data: {
+      books: books.map((book) => ({
+        id: book.id,
+        name: book.name,
+        publisher: book.publisher,
+      })),
+    },
+  });
+  response.code(200);
+  return response;
+};
 
 const getBookByIdHandler = (request, h) => {
   const { bookId } = request.params;

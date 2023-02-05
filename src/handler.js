@@ -29,7 +29,6 @@ const addBookHandler = (request, h) => {
   const isSuccess = name && readPage <= pageCount;
 
   if (!name) {
-    console.log(bookshelf);
     const response = h.response({
       status: 'fail',
       message: 'Gagal menambahkan buku. Mohon isi nama buku',
@@ -81,9 +80,6 @@ const getAllBooksHandler = () => ({
 
 const getBookByIdHandler = (request, h) => {
   const { bookId } = request.params;
-
-  console.log(request.params);
-
   const book = bookshelf.filter((b) => b.id === bookId)[0];
 
   if (book !== undefined) {
@@ -103,4 +99,68 @@ const getBookByIdHandler = (request, h) => {
   return response;
 };
 
-module.exports = { addBookHandler, getAllBooksHandler, getBookByIdHandler };
+const editBookByIdHandler = (request, h) => {
+  const { bookId } = request.params;
+
+  const {
+    name, year, author, summary, publisher, pageCount, readPage, reading,
+  } = request.payload;
+  const updatedAt = new Date().toISOString();
+
+  const index = bookshelf.findIndex((book) => book.id === bookId);
+  const isDataValid = index !== -1 && name && readPage <= pageCount;
+
+  if (!name) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal memperbarui buku. Mohon isi nama buku',
+    });
+    response.code(400);
+    return response;
+  }
+
+  if (readPage > pageCount) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount',
+    });
+    response.code(400);
+    return response;
+  }
+
+  if (isDataValid) {
+    bookshelf[index] = {
+      ...bookshelf[index],
+      name,
+      year,
+      author,
+      summary,
+      publisher,
+      pageCount,
+      readPage,
+      reading,
+      updatedAt,
+    };
+
+    const response = h.response({
+      status: 'success',
+      message: 'Buku berhasil diperbarui',
+    });
+    response.code(200);
+    return response;
+  }
+
+  const response = h.response({
+    status: 'fail',
+    message: 'Gagal memperbarui buku. Id tidak ditemukan',
+  });
+  response.code(404);
+  return response;
+};
+
+module.exports = {
+  addBookHandler,
+  getAllBooksHandler,
+  getBookByIdHandler,
+  editBookByIdHandler,
+};

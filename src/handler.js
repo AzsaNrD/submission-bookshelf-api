@@ -26,11 +26,10 @@ const addBookHandler = (request, h) => {
     updatedAt,
   };
 
-  bookshelf.push(newBook);
-
-  const isSuccess = bookshelf.filter((b) => b.id === id).length > 0 && name && readPage > pageCount;
+  const isSuccess = name && readPage <= pageCount;
 
   if (!name) {
+    console.log(bookshelf);
     const response = h.response({
       status: 'fail',
       message: 'Gagal menambahkan buku. Mohon isi nama buku',
@@ -49,6 +48,7 @@ const addBookHandler = (request, h) => {
   }
 
   if (isSuccess) {
+    bookshelf.push(newBook);
     const response = h.response({
       status: 'success',
       message: 'Buku berhasil ditambahkan',
